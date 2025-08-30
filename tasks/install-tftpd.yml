@@ -52,6 +52,79 @@
         remote_src: true
         dest: /srv/tftp/
 
+    - name: Obtain the current non-free firmware image. Configure firmware_url in vars or defaults
+      ansible.builtin.get_url:
+        url: "{{ firmware_url }}"
+        dest: /srv/tftp/debian-installer/amd64/
+        force: true
+        mode: "0644"
+
+    - name: GUnzip the firmware file
+      ansible.builtin.command: >
+        gunzip -f /srv/tftp/debian-installer/amd64/firmware.cpio.gz
+      args:
+        creates: /srv/tftp/debian-installer/amd64/firmware.cpio
+      become: true
+      become_user: root
+
+    - name: Unpack the firmware cpio, filtering only realtek packages
+      ansible.builtin.command: >
+        bash -c 'cd /srv/tftp/debian-installer/amd64/ && cpio -idv *realtek* < firmware.cpio'
+      args:
+        chdir: /srv/tftp/debian-installer/amd64/
+        creates: /srv/tftp/debian-installer/amd64/firmware
+      become: true
+      become_user: root
+
+    - name: Unpack the contents-firmware file, unknown if needed
+      ansible.builtin.command: >
+        bash -c 'cd /srv/tftp/debian-installer/amd64/ && cpio -idv *ontents* < firmware.cpio'
+      args:
+        chdir: /srv/tftp/debian-installer/amd64/
+        creates: /srv/tftp/debian-installer/amd64/firmware/Contents-firmware
+      become: true
+      become_user: root
+
+    - name: Remove the firmware.cpio file, as we will overwrite it
+      ansible.builtin.file:
+        path: /srv/tftp/debian-installer/amd64/firmware.cpio
+        state: absent
+      become: true
+      become_user: root
+
+    - name: Repack the firmware files into a new firware.cpio.gz
+      ansible.builtin.command: >
+        bash -c 'cd /srv/tftp/debian-installer/amd64/ && find ./firmware | cpio -ov -H newc | gzip -c > firmware.cpio.gz'
+      args:
+        chdir: /srv/tftp/debian-installer/amd64/
+        creates: /srv/tftp/debian-installer/amd64/firmware.cpio.gz
+      become: true
+      become_user: root
+
+    - name: Update the initrd.gz with the new firmware.cpio.gz
+      ansible.builtin.command: >
+        bash -c 'cd /srv/tftp/debian-installer/amd64/ && cat initrd.gz firmware.cpio.gz > initrd.gz.new'
+      args:
+        chdir: /srv/tftp/debian-installer/amd64/
+        creates: /srv/tftp/debian-installer/amd64/initrd.gz.new
+      become: true
+      become_user: root
+
+    - name: Remove the old initrd.gz
+      ansible.builtin.file:
+        path: /srv/tftp/debian-installer/amd64/initrd.gz
+        state: absent
+      become: true
+      become_user: root
+
+    - name: Move the new initrd.gz into place
+      ansible.builtin.command: >
+        mv /srv/tftp/debian-installer/amd64/initrd.gz.new /srv/tftp/debian-installer/amd64/initrd.gz
+      args:
+        creates: /srv/tftp/debian-installer/amd64/initrd.gz
+      become: true
+      become_user: root
+
     # These with_items come from the netboot tarball and cannot be configured - leave them as-is
     - name: Place the specific config files into the correct folder
       ansible.builtin.template:
