@@ -3,6 +3,6 @@
 #  maintaining the tftp netboot config, refreshing pihole, but not re-installing fully
 # netboot_download: true # controls downloading a new netboot.tar.gz
 # Downloading a netboot image now depends on the age of the current image
-netboot_max_age: "0d"
+netboot_max_age: "80d"
 netboot_url: "https://deb.debian.org/debian/dists/trixie/main/installer-amd64/current/images/netboot/netboot.tar.gz"
 firmware_url: "https://cdimage.debian.org/cdimage/firmware/trixie/current/firmware.cpio.gz"
