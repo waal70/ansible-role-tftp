@@ -3,6 +3,13 @@
 # This server should have tftp, preseed.cfg
 # Then, it will take the latest netboot from the internet
 # And configure the relevant files for it
+- name: Include vaulted variables
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ lookup('env', 'PRIVATE_REPO') | default('~') }}/ansible-vault/{{ ansible_role_name }}-vars.yml"
+      skip: true
 
 - name: Ensure TFTPD is present on the system
   ansible.builtin.import_tasks: install-tftpd.yml
@@ -15,13 +22,15 @@
     state: directory
     mode: "0755"
 
+- name: Read public key for ansible_user into variable
+  ansible.builtin.set_fact:
+    pubkey_content: "{{ lookup('ansible.builtin.file', private_repo ~ '/ssh-keys/' ~ ansible_user ~ '/' ~ ansible_user ~ '-key.pub') | default('no pubkey found') }}" # noqa: yaml[line-length]
+
 # Note that the path (/) is relied upon by scripts. If you wish to host in a
 # sub-folder, change this task and the previous task to reflect
 # Also, change the txt.cfg file to correctly reflect this in /preseed/url
 - name: Ensure preseed.cfg is in the /var/www/html folder
-  ansible.builtin.copy:
-    src: "{{ playbook_dir }}/debian-preseed/preseed.cfg"
-    dest: "/var/www/html"
-    owner: root
-    group: root
+  ansible.builtin.template:
+    src: preseed.cfg.j2
+    dest: /var/www/html/preseed.cfg
     mode: "0644"
