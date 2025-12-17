@@ -4,11 +4,12 @@ waal70.tftp
 Installs tftp to host the trivial FTP server in order to enable network booting.  
 It will download the Debian netboot image, and place it into the appropriate folder for the tftp-server.  
 It will configure the netboot image, in order to set some defaults, SAY things to the user and use a preseed.cfg for Debian installs.  
-If requested, it will purge the pihole adlist database and repopulate, using mongodb commands.
 
 Requirements
 ------------
 
+Assumes tftp will be installed to a system running a webserver.
+I assume it will go onto a server that also runs PiHole
 
 Role Variables
 --------------
