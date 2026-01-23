@@ -52,6 +52,38 @@
         remote_src: true
         dest: /srv/tftp/
 
+    - name: Read public key for ansible_user into variable
+      ansible.builtin.set_fact:
+        pubkey_content: "{{ lookup('ansible.builtin.file', private_repo ~ '/ssh-keys/' ~ ansible_user ~ '/' ~ ansible_user ~ '-key.pub') | default('no pubkey found') }}" # noqa: yaml[line-length]
+
+    # Note that the path (/) is relied upon by scripts. If you wish to host in a
+    # sub-folder, change this task and the previous task to reflect
+    # Also, change the txt.cfg file to correctly reflect this in /preseed/url
+    - name: Ensure preseed.cfg is current
+      ansible.builtin.template:
+        src: preseed.cfg.j2
+        dest: preseed.cfg
+        mode: "0644"
+
+    - name: GUnzip the current initrd.gz
+      ansible.builtin.command: >
+        gunzip -f /srv/tftp/debian-installer/amd64/initrd.gz
+      args:
+        creates: /srv/tftp/debian-installer/amd64/initrd
+      become: true
+      become_user: root
+
+    - name: Slipstream preseed.cfg into initrd.gz
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          echo preseed.cfg | cpio -H newc -o -A -F /srv/tftp/debian-installer/amd64/initrd | gzip /srv/tftp/debian-installer/amd64/initrd
+        executable: /bin/bash
+      become: true
+      become_user: root
+      register: preseed_slipstream
+      changed_when: preseed_slipstream.rc == 0
+
     - name: Obtain the current non-free firmware image. Configure firmware_url in vars or defaults
       ansible.builtin.get_url:
         url: "{{ firmware_url }}"
