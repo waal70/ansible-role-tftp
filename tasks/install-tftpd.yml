@@ -54,7 +54,7 @@
 
     - name: Read public key for ansible_user into variable
       ansible.builtin.set_fact:
-        pubkey_content: "{{ lookup('ansible.builtin.file', private_repo ~ '/ssh-keys/' ~ ansible_user ~ '/' ~ ansible_user ~ '-key-install-only.pub') | default('no pubkey found') }}" # noqa: yaml[line-length]
+        pubkey_content: "{{ lookup('ansible.builtin.file', install_key ~ '.pub') }}"
 
     # Note that the path (/) is relied upon by scripts. If you wish to host in a
     # sub-folder, change this task and the previous task to reflect
