@@ -43,6 +43,9 @@
       - "Netboot is {{ (now() - (version_mtime | to_datetime('%Y%m%d-%H%M%S'))).days }} days old"
       - "Maximum allowed age is {{ netboot_max_age }}"
 
+- name: Include tasks to (optionally) inject a filesystem that you may use to configure secrets
+  ansible.builtin.include_tasks: install-custom-secrets.yml
+
 - name: Block to install or refresh netboot image files
   when: netboot_age.files | length > 0
   block:

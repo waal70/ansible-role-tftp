@@ -1,4 +1,4 @@
 label install
 	menu label ^Install
 	kernel debian-installer/amd64/linux
-	append vga=788 auto=true priority=critical interface=auto initrd=debian-installer/amd64/initrd.gz --- quiet 
+	append vga=788 auto=true priority=critical interface=auto initrd=debian-installer/amd64/initrd.gz,debian-installer/amd64/custom-secrets.img --- quiet 

@@ -86,6 +86,15 @@ d-i finish-install/reboot_in_progress note
 # NOTE that the password supplied to 'useradd' should have $-characters ESCAPED!
 d-i preseed/late_command string in-target useradd -m {{ ansible_user }}; \
 in-target mkdir -p /home/{{ ansible_user }}/.ssh; \
+in-target cp /run/initramfs/extra/master.secret /home/{{ ansible_user }}/master_secret; \
+MASTER_SECRET=$(cat /run/initramfs/extra/master.secret); \
+echo "$MASTER_SECRET" > /target/home/{{ ansible_user }}/debug.txt; \
+MAC=$(cat /sys/class/net/$(ls /sys/class/net | grep -v '^lo$' | head -n1)/address | tr -d :) ;\
+echo "$MAC" >> /target/home/{{ ansible_user }}/debug.txt; \
+VAULT_PASS=$(printf "%s%s" "$MAC" "$MASTER_SECRET" | sha256sum | awk '{print $1}') ; \
+echo "$VAULT_PASS" > /target/home/{{ ansible_user }}/vault_pass.txt; \
+in-target chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/vault_pass.txt; \
+in-target chmod 600 /home/{{ ansible_user }}/vault_pass.txt; \
 in-target usermod -aG sudo {{ ansible_user }}; \
 in-target touch /home/{{ ansible_user }}/.ssh/authorized_keys; \
 in-target /bin/sh -c "echo '{{ pubkey_content }}' >> /home/{{ ansible_user }}/.ssh/authorized_keys"; \
@@ -94,4 +103,4 @@ in-target chmod 600 /home/{{ ansible_user }}/.ssh/authorized_keys; \
 in-target chmod 700 /home/{{ ansible_user }}/.ssh/; \
 in-target touch /etc/sudoers.d/{{ ansible_user }}; \
 in-target /bin/sh -c "echo '{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ ansible_user }}"; \
-in-target chmod 440 /etc/sudoers.d/{{ ansible_user }}; 
+in-target chmod 440 /etc/sudoers.d/{{ ansible_user }};
