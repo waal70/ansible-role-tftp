@@ -15,8 +15,8 @@ d-i netcfg/wireless_wep string
 
 ### Mirror settings
 d-i mirror/country string manual
-d-i mirror/http/hostname string debian.snt.utwente.nl
-d-i mirror/http/directory string /debian
+d-i mirror/http/hostname string {{ target_apt_mirror }}
+d-i mirror/http/directory string {{ target_apt_directory }}
 d-i mirror/http/proxy string
 
 ### Account setup
