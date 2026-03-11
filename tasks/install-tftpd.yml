@@ -19,6 +19,7 @@
     status_code:
       - 200
       - 404
+      - -1
   register: localmirror
 
 - name: Set the target mirror according to the status_code. A 404 means local repo is not up.
