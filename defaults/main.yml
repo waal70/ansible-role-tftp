@@ -5,6 +5,13 @@
 # Downloading a netboot image now depends on the age of the current image
 netboot_max_age: "80d"
 # netboot_url: "https://deb.debian.org/debian/dists/trixie/main/installer-amd64/current/images/netboot/netboot.tar.gz"
-fallback_apt_mirror: "debian.snt.utwente.nl"
-netboot_url: "http://{{ local_apt_mirror }}/dists/trixie/main/installer-amd64/current/images/netboot/netboot.tar.gz"
+
+netboot_url: "http://{{ target_apt_mirror }}{{ target_apt_directory }}/dists/trixie/main/installer-amd64/current/images/netboot/netboot.tar.gz"
 firmware_url: "https://cdimage.debian.org/cdimage/firmware/trixie/current/firmware.cpio.gz"
+
+
+# Override these in your site-wide group_vars/all.yml
+apt_mirror: debian.snt.utwente.nl
+apt_mirror_directory: "/debian"
+apt_mirror_fallback: "mirror.nl.leaseweb.net"
+apt_mirror_fallback_directory: "/debian"

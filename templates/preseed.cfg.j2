@@ -31,7 +31,7 @@ d-i passwd/user-password-crypted password {{ crypted_password }}
 
 ### Clock and time zone setup
 d-i clock-setup/utc boolean true
-d-i time/zone string Europe/Amsterdam
+d-i time/zone string {{ site_timezone }}
 d-i clock-setup/ntp boolean true
 
 ### Partitioning
