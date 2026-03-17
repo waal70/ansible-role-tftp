@@ -14,7 +14,7 @@ d-i netcfg/hostname string defaultdebian
 d-i netcfg/wireless_wep string
 
 ### Mirror settings
-{% if target_apt_mirror != fallback_apt_mirror %}d-i debian-installer/allow_unauthenticated boolean true{% endif %}
+{% if target_apt_mirror != apt_mirror_fallback %}d-i debian-installer/allow_unauthenticated boolean true{% endif %}
 
 d-i mirror/country string manual
 d-i mirror/http/hostname string {{ target_apt_mirror }}
